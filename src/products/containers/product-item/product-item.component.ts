@@ -6,6 +6,7 @@ import { Topping } from "../../models/topping.model";
 import { Observable } from "rxjs/Observable";
 import { Store } from "@ngrx/store";
 import * as fromProductStore from "../../store";
+import { tap } from "rxjs/operators";
 
 @Component({
   selector: "product-item",
@@ -15,13 +16,13 @@ import * as fromProductStore from "../../store";
       class="product-item">
       <pizza-form
         [pizza]="pizza$ | async"
-        [toppings]="toppings"
+        [toppings]="toppings$ | async"
         (selected)="onSelect($event)"
         (create)="onCreate($event)"
         (update)="onUpdate($event)"
         (remove)="onRemove($event)">
         <pizza-display
-          [pizza]="visualise">
+          [pizza]="visualise$ | async">
         </pizza-display>
       </pizza-form>
     </div>
@@ -29,25 +30,29 @@ import * as fromProductStore from "../../store";
 })
 export class ProductItemComponent implements OnInit {
   pizza$: Observable<Pizza>;
-  visualise: Pizza;
-  toppings: Topping[];
+  visualise$: Observable<Pizza>;
+  toppings$: Observable<Topping[]>;
 
   constructor(private store: Store<fromProductStore.ProductsState>) {}
 
   ngOnInit() {
-    this.pizza$ = this.store.select(fromProductStore.getPizzaEntity);
+    // load visualization only if the product exits(not new pizza)
+    // this.store.dispatch(new fromProductStore.LoadVisualization());
+    this.pizza$ = this.store.select(fromProductStore.getPizzaEntity).pipe(
+      tap((pizza: Pizza = null) => {
+        const pizzaExists = !!(pizza && pizza.toppings);
+        const toppings = pizzaExists
+          ? pizza.toppings.map(topping => topping.id)
+          : [];
+        this.store.dispatch(new fromProductStore.VisualizeToppings(toppings));
+      })
+    );
+    this.toppings$ = this.store.select(fromProductStore.getToppings);
+    this.visualise$ = this.store.select(fromProductStore.getPizzaVisualized);
   }
 
   onSelect(event: number[]) {
-    // let toppings;
-    // if (this.toppings && this.toppings.length) {
-    //   toppings = event.map(id =>
-    //     this.toppings.find(topping => topping.id === id)
-    //   );
-    // } else {
-    //   toppings = this.pizza.toppings;
-    // }
-    // this.visualise = { ...this.pizza, toppings };
+    this.store.dispatch(new fromProductStore.VisualizeToppings(event));
   }
 
   onCreate(event: Pizza) {
