@@ -13,7 +13,7 @@ export class PizzaEffects {
     private actions$: Actions
   ) {}
   // LoadPizzas will listen for LOAD_PIZZAS action and
-  // Makes call to pizzaService.getPizaas()
+  // Makes call to pizzaService.getPizzas()
   // Dispatched action 'LOAD_PIZZAS_SUCCESS' or 'LOAD_PIZZAS_FAIL' with payload based
   // on the response we get from getPizzas;
   @Effect()
