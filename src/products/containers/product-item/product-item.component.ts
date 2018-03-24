@@ -56,23 +56,17 @@ export class ProductItemComponent implements OnInit {
   }
 
   onCreate(event: Pizza) {
-    // this.pizzaService.createPizza(event).subscribe(pizza => {
-    //   this.router.navigate([`/products/${pizza.id}`]);
-    // });
+    this.store.dispatch(new fromProductStore.CreatePizza(event));
   }
 
   onUpdate(event: Pizza) {
-    // this.pizzaService.updatePizza(event).subscribe(() => {
-    //   this.router.navigate([`/products`]);
-    // });
+    this.store.dispatch(new fromProductStore.UpdatePizza(event));
   }
 
   onRemove(event: Pizza) {
-    // const remove = window.confirm('Are you sure?');
-    // if (remove) {
-    //   this.pizzaService.removePizza(event).subscribe(() => {
-    //     this.router.navigate([`/products`]);
-    //   });
-    // }
+    const remove = window.confirm("Are you sure?");
+    if (remove) {
+      this.store.dispatch(new fromProductStore.RemovePizza(event));
+    }
   }
 }
